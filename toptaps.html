@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zetamel Top Taps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!--
+  ZETAMEL · TOP TAP TAP
+  Ranking de taps (likes) propio, alimentado por la Event API local de TikFinity.
+  Requisito: la app de escritorio de TikFinity abierta y conectada al LIVE.
+
+  Parámetros de URL (opcionales):
+    ?top=5        cuántos puestos mostrar (1-10, default 5)
+    ?demo=1       simula taps para probar el diseño sin estar en vivo
+    ?reset=1      borra el ranking guardado al abrir
+    ?title=...    cambia el título (default "TOP TAP TAP")
+-->
+<style>
+  :root{
+    --void:#050911;
+    --bone:#ece8dd;
+    --lav:#b28fef;
+    --cyan:#65c6e4;
+    --indigo:#433e7b;
+    --silver:#e0dfe3;
+    --panel:rgba(5,9,17,.78);
+    --row:rgba(67,62,123,.22);
+    --w:340px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:transparent;overflow:hidden}
+  body{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    color:var(--bone);
+    padding:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- panel ---------- */
+  .panel{
+    position:relative;
+    width:var(--w);
+    padding:16px 14px 14px;
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgba(178,143,239,.20), transparent 60%),
+      linear-gradient(180deg, rgba(67,62,123,.35), transparent 40%),
+      var(--panel);
+    border:1px solid rgba(178,143,239,.45);
+    border-radius:14px;
+    box-shadow:
+      0 0 0 1px rgba(5,9,17,.9) inset,
+      0 0 28px rgba(178,143,239,.22),
+      0 18px 40px rgba(0,0,0,.55);
+    overflow:hidden;
+    isolation:isolate;
+  }
+  /* scanlines CRT */
+  .panel::before{
+    content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:repeating-linear-gradient(180deg, rgba(236,232,221,.045) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  /* grano */
+  .panel::after{
+    content:"";position:absolute;inset:-50%;z-index:3;pointer-events:none;opacity:.10;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation:grain 1.2s steps(6) infinite;
+  }
+  @keyframes grain{
+    0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}
+    60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}100%{transform:translate(0,0)}
+  }
+
+  /* ---------- header ---------- */
+  .head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+  .title{
+    position:relative;
+    font-family:"Big Shoulders Display",sans-serif;font-weight:800;
+    font-size:34px;line-height:.9;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--bone);
+    text-shadow:0 0 14px rgba(178,143,239,.55);
+  }
+  .title::before,.title::after{
+    content:attr(data-text);position:absolute;left:0;top:0;width:100%;
+    overflow:hidden;pointer-events:none;
+  }
+  .title::before{color:var(--lav);transform:translate(-2px,0);mix-blend-mode:screen;opacity:.85;clip-path:inset(0 0 55% 0);animation:glitchA 5s infinite steps(1)}
+  .title::after{color:var(--cyan);transform:translate(2px,0);mix-blend-mode:screen;opacity:.55;clip-path:inset(60% 0 0 0);animation:glitchB 5s infinite steps(1)}
+  @keyframes glitchA{
+    0%,86%,100%{transform:translate(-2px,0);clip-path:inset(0 0 55% 0)}
+    88%{transform:translate(-5px,-1px);clip-path:inset(10% 0 70% 0)}
+    90%{transform:translate(3px,1px);clip-path:inset(40% 0 30% 0)}
+    92%{transform:translate(-1px,0);clip-path:inset(0 0 80% 0)}
+  }
+  @keyframes glitchB{
+    0%,86%,100%{transform:translate(2px,0);clip-path:inset(60% 0 0 0)}
+    88%{transform:translate(5px,1px);clip-path:inset(70% 0 5% 0)}
+    90%{transform:translate(-3px,0);clip-path:inset(30% 0 45% 0)}
+    92%{transform:translate(1px,0);clip-path:inset(85% 0 0 0)}
+  }
+  .sub{
+    font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,232,221,.6);
+    display:flex;align-items:center;gap:6px;padding-bottom:3px;white-space:nowrap
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:#6b6880;box-shadow:none;transition:.3s}
+  .dot.on{background:var(--lav);box-shadow:0 0 8px var(--lav);animation:blink 1.6s infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .rule{position:relative;z-index:2;height:1px;margin:-4px 0 10px;
+    background:linear-gradient(90deg, var(--lav), rgba(178,143,239,.15) 70%, transparent)}
+
+  /* ---------- rows ---------- */
+  .list{position:relative;z-index:2;list-style:none;display:flex;flex-direction:column;gap:6px}
+  .row{
+    position:relative;display:grid;grid-template-columns:30px 38px 1fr auto;align-items:center;gap:10px;
+    padding:7px 10px 7px 6px;border-radius:10px;
+    background:var(--row);
+    border:1px solid rgba(236,232,221,.06);
+    will-change:transform;
+  }
+  .row.enter{animation:enter .45s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes enter{from{opacity:0;transform:translateX(-18px) skewX(-6deg)}to{opacity:1;transform:none}}
+
+  .rank{
+    font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:22px;text-align:center;
+    color:rgba(236,232,221,.55);
+  }
+  .rank small{font-size:12px;opacity:.6;margin-right:1px}
+  .ava{
+    width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--indigo);
+    border:2px solid rgba(224,223,227,.55);
+    box-shadow:0 0 0 2px rgba(5,9,17,.9);
+  }
+  .ava.ph{display:grid;place-items:center;font-weight:700;font-size:15px;color:var(--bone)}
+  .name{min-width:0;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--bone)}
+  .name .handle{display:block;font-size:10px;font-weight:400;color:rgba(236,232,221,.45);overflow:hidden;text-overflow:ellipsis}
+  .count{
+    font-weight:700;font-size:14px;color:var(--bone);text-align:right;
+    display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums
+  }
+  .count svg{width:13px;height:13px;fill:var(--lav);filter:drop-shadow(0 0 4px rgba(178,143,239,.8))}
+  .count.bump{animation:bump .35s ease-out}
+  @keyframes bump{40%{transform:scale(1.18);color:var(--lav)}}
+  .plus{
+    position:absolute;right:14px;top:-4px;font-size:11px;font-weight:700;color:var(--cyan);
+    pointer-events:none;animation:plus .9s ease-out forwards;text-shadow:0 0 6px rgba(101,198,228,.8)
+  }
+  @keyframes plus{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-16px)}}
+
+  /* #1 — lavanda domina */
+  .row.r1{
+    padding:10px 10px 10px 6px;
+    background:linear-gradient(90deg, rgba(178,143,239,.38), rgba(67,62,123,.30) 60%, rgba(5,9,17,.2));
+    border:1px solid rgba(178,143,239,.75);
+    box-shadow:0 0 18px rgba(178,143,239,.35), inset 0 0 18px rgba(178,143,239,.15);
+  }
+  .row.r1::after{ /* barrido de luz de monitor */
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(105deg, transparent 30%, rgba(236,232,221,.18) 45%, transparent 60%);
+    background-size:250% 100%;animation:sweep 3.8s ease-in-out infinite
+  }
+  @keyframes sweep{0%{background-position:130% 0}60%,100%{background-position:-60% 0}}
+  .row.r1 .rank{color:var(--lav);font-size:28px;text-shadow:0 0 10px rgba(178,143,239,.9)}
+  .row.r1 .ava{width:44px;height:44px;border-color:var(--silver);box-shadow:0 0 0 2px var(--void),0 0 14px rgba(178,143,239,.7)}
+  .row.r1{grid-template-columns:30px 44px 1fr auto}
+  .row.r1 .name{font-size:16px;font-weight:700}
+  .row.r1 .count{font-size:16px}
+  .gem{ /* gema cromada sobre el #1 (plata + lavanda, nunca dorado) */
+    position:absolute;left:44px;top:-7px;width:14px;height:14px;transform:rotate(45deg);
+    background:linear-gradient(135deg,#fff,var(--silver) 35%,var(--lav) 70%,var(--indigo));
+    border:1px solid rgba(255,255,255,.8);box-shadow:0 0 10px rgba(178,143,239,.9);z-index:2
+  }
+  /* #2 y #3 — plata */
+  .row.r2 .rank,.row.r3 .rank{color:var(--silver)}
+  .row.r2 .ava,.row.r3 .ava{border-color:var(--silver)}
+  .row.r2{border-color:rgba(224,223,227,.22)}
+  .row.r3{border-color:rgba(224,223,227,.14)}
+
+  .empty{position:relative;z-index:2;padding:16px 4px 8px;font-size:12px;line-height:1.6;color:rgba(236,232,221,.6)}
+  .empty b{color:var(--lav);font-weight:700}
+  .foot{position:relative;z-index:2;margin-top:10px;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(236,232,221,.4)}
+  .foot b{color:var(--cyan);font-weight:500}
+</style>
+</head>
+<body>
+  <div class="panel">
+    <div class="head">
+      <div class="title" id="title" data-text="TOP TAP TAP">TOP TAP TAP</div>
+      <div class="sub"><span class="dot" id="dot"></span><span id="status">offline</span></div>
+    </div>
+    <div class="rule"></div>
+    <ol class="list" id="list"></ol>
+    <div class="empty" id="empty">Tocá la pantalla y <b>subí al ranking</b> ♡</div>
+    <div class="foot"><span>zetamel_</span><span>total <b id="total">0</b></span></div>
+  </div>
+
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var TOP = Math.max(1, Math.min(10, parseInt(q.get('top') || '5', 10) || 5));
+  var DEMO = q.get('demo') === '1';
+  var KEY = 'zetamel_toptaps_v1';
+  var title = q.get('title');
+  if (title) { var t = document.getElementById('title'); t.textContent = title; t.setAttribute('data-text', title); }
+
+  var store = {};          // id -> {id, name, handle, pic, likes}
+  var total = 0;
+  try {
+    if (q.get('reset') === '1') localStorage.removeItem(KEY);
+    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && saved.store) { store = saved.store; total = saved.total || 0; }
+  } catch(e) {}
+
+  var listEl = document.getElementById('list');
+  var emptyEl = document.getElementById('empty');
+  var totalEl = document.getElementById('total');
+  var dot = document.getElementById('dot');
+  var statusEl = document.getElementById('status');
+  var HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+  var fmt = new Intl.NumberFormat('es-AR');
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify({store:store,total:total})); } catch(e){} }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  // Acepta el formato plano viejo de TikTok-Live-Connector y el anidado (data.user) nuevo.
+  function parseLike(d){
+    if (!d) return null;
+    var u = d.user || d;
+    var id = u.uniqueId || u.userId || d.uniqueId || d.userId;
+    if (!id) return null;
+    var pic = u.profilePictureUrl || d.profilePictureUrl ||
+              (u.profilePicture && u.profilePicture.url && u.profilePicture.url[0]) ||
+              (u.profilePicture && u.profilePicture.urls && u.profilePicture.urls[0]) || '';
+    var n = parseInt(d.likeCount != null ? d.likeCount : (d.count != null ? d.count : 1), 10) || 1;
+    return { id:String(id), name:u.nickname || d.nickname || id, handle:u.uniqueId || d.uniqueId || '', pic:pic, n:n };
+  }
+
+  function addLike(p){
+    var e = store[p.id] || (store[p.id] = { id:p.id, name:p.name, handle:p.handle, pic:p.pic, likes:0 });
+    e.likes += p.n; e.name = p.name || e.name; e.pic = p.pic || e.pic; e.handle = p.handle || e.handle;
+    total += p.n;
+    pending[p.id] = (pending[p.id] || 0) + p.n;
+    schedule();
+  }
+
+  var pending = {}, raf = 0;
+  function schedule(){ if (!raf) raf = setTimeout(function(){ raf = 0; render(); save(); }, 120); }
+
+  function rowHTML(e, i){
+    var ava = e.pic
+      ? '<img class="ava" src="' + esc(e.pic) + '" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<div class=&quot;ava ph&quot;>' + esc((e.name||'?').charAt(0).toUpperCase()) + '</div>\'">'
+      : '<div class="ava ph">' + esc((e.name||'?').charAt(0).toUpperCase()) + '</div>';
+    return (i === 0 ? '<span class="gem"></span>' : '') +
+      '<div class="rank"><small>#</small>' + (i+1) + '</div>' + ava +
+      '<div class="name">' + esc(e.name) + (e.handle && e.handle !== e.name ? '<span class="handle">@' + esc(e.handle) + '</span>' : '') + '</div>' +
+      '<div class="count">' + HEART + '<span class="num">' + fmt.format(e.likes) + '</span></div>';
+  }
+
+  function render(){
+    var top = Object.keys(store).map(function(k){ return store[k]; })
+      .sort(function(a,b){ return b.likes - a.likes; }).slice(0, TOP);
+
+    // FLIP: guardar posiciones previas
+    var prev = {};
+    Array.prototype.forEach.call(listEl.children, function(li){ prev[li.dataset.id] = li.getBoundingClientRect().top; });
+
+    var existing = {};
+    Array.prototype.forEach.call(listEl.children, function(li){ existing[li.dataset.id] = li; });
+    var frag = document.createDocumentFragment();
+    top.forEach(function(e, i){
+      var li = existing[e.id];
+      var isNew = !li;
+      if (isNew) { li = document.createElement('li'); li.dataset.id = e.id; }
+      li.className = 'row r' + (i+1) + (isNew ? ' enter' : '');
+      li.innerHTML = rowHTML(e, i);
+      if (pending[e.id]) {
+        var c = li.querySelector('.count'); c.classList.add('bump');
+        var pl = document.createElement('span'); pl.className = 'plus'; pl.textContent = '+' + pending[e.id];
+        li.appendChild(pl);
+      }
+      delete existing[e.id];
+      frag.appendChild(li);
+    });
+    listEl.innerHTML = '';
+    listEl.appendChild(frag);
+    pending = {};
+
+    // FLIP: animar desde la posición vieja
+    Array.prototype.forEach.call(listEl.children, function(li){
+      var old = prev[li.dataset.id];
+      if (old == null) return;
+      var dy = old - li.getBoundingClientRect().top;
+      if (dy) {
+        li.style.transform = 'translateY(' + dy + 'px)'; li.style.transition = 'none';
+        requestAnimationFrame(function(){ li.style.transition = 'transform .45s cubic-bezier(.2,.8,.2,1)'; li.style.transform = ''; });
+      }
+    });
+
+    emptyEl.style.display = top.length ? 'none' : 'block';
+    totalEl.textContent = fmt.format(total);
+  }
+
+  function setStatus(on, txt){ dot.classList.toggle('on', !!on); statusEl.textContent = txt; }
+
+  // ---------- conexión a TikFinity Event API ----------
+  var ws, retry = 1000;
+  function connect(){
+    try { ws = new WebSocket('ws://localhost:21213/'); }
+    catch(e){ setStatus(false, 'sin tikfinity'); return setTimeout(connect, retry); }
+    ws.onopen = function(){ retry = 1000; setStatus(true, 'live'); };
+    ws.onmessage = function(ev){
+      var msg; try { msg = JSON.parse(ev.data); } catch(e){ return; }
+      if (!msg) return;
+      if (msg.event === 'like') { var p = parseLike(msg.data); if (p) addLike(p); }
+    };
+    ws.onclose = function(){ setStatus(false, 'reconectando'); setTimeout(connect, retry); retry = Math.min(retry * 2, 15000); };
+    ws.onerror = function(){ try { ws.close(); } catch(e){} };
+  }
+
+  // ---------- demo ----------
+  function demo(){
+    setStatus(true, 'demo');
+    var people = [
+      ['nocturna.exe','nocturna_exe'],['synthboi','synthboi'],['pixelhada','pixel.hada'],['tokitokill','tokitokill'],
+      ['luzdemonitor','luz.monitor'],['casete_roto','casete_roto'],['vaporgirl','vapor_girl'],['p3_lloro','p3lloro']
+    ];
+    setInterval(function(){
+      var w = Math.floor(Math.pow(Math.random(), 1.7) * people.length);
+      var p = people[w];
+      addLike({ id:p[1], name:p[0], handle:p[1], pic:'', n: 1 + Math.floor(Math.random() * 15) });
+    }, 450);
+  }
+
+  render();
+  if (DEMO) demo(); else connect();
+})();
+</script>
+</body>
+</html>
