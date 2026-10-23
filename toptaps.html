@@ -27,9 +27,9 @@
     --cyan:#65c6e4;
     --indigo:#433e7b;
     --silver:#e0dfe3;
-    --panel:rgba(5,9,17,.78);
-    --row:rgba(67,62,123,.22);
-    --w:340px;
+    --panel:rgba(5,9,17,.40);
+    --row:rgba(67,62,123,.14);
+    --w:300px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:transparent;overflow:hidden}
@@ -38,23 +38,24 @@
     color:var(--bone);
     padding:14px;
     -webkit-font-smoothing:antialiased;
+    text-shadow:0 1px 3px rgba(5,9,17,.85);
   }
 
   /* ---------- panel ---------- */
   .panel{
     position:relative;
     width:var(--w);
-    padding:16px 14px 14px;
+    padding:12px 12px 12px;
     background:
-      radial-gradient(120% 70% at 0% 0%, rgba(178,143,239,.20), transparent 60%),
-      linear-gradient(180deg, rgba(67,62,123,.35), transparent 40%),
+      radial-gradient(120% 70% at 0% 0%, rgba(178,143,239,.12), transparent 60%),
+      linear-gradient(180deg, rgba(67,62,123,.18), transparent 40%),
       var(--panel);
-    border:1px solid rgba(178,143,239,.45);
+    border:1px solid rgba(178,143,239,.35);
     border-radius:14px;
     box-shadow:
       0 0 0 1px rgba(5,9,17,.9) inset,
-      0 0 28px rgba(178,143,239,.22),
-      0 18px 40px rgba(0,0,0,.55);
+      0 0 22px rgba(178,143,239,.16),
+      0 12px 28px rgba(0,0,0,.30);
     overflow:hidden;
     isolation:isolate;
   }
@@ -76,11 +77,11 @@
   }
 
   /* ---------- header ---------- */
-  .head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+  .head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
   .title{
     position:relative;
     font-family:"Big Shoulders Display",sans-serif;font-weight:800;
-    font-size:34px;line-height:.9;letter-spacing:.04em;text-transform:uppercase;
+    font-size:22px;line-height:.9;letter-spacing:.06em;text-transform:uppercase;
     color:var(--bone);
     text-shadow:0 0 14px rgba(178,143,239,.55);
   }
@@ -118,7 +119,7 @@
     position:relative;display:grid;grid-template-columns:30px 38px 1fr auto;align-items:center;gap:10px;
     padding:7px 10px 7px 6px;border-radius:10px;
     background:var(--row);
-    border:1px solid rgba(236,232,221,.06);
+    border:1px solid rgba(236,232,221,.05);
     will-change:transform;
   }
   .row.enter{animation:enter .45s cubic-bezier(.2,.9,.3,1.2)}
@@ -153,7 +154,7 @@
   /* #1 — lavanda domina */
   .row.r1{
     padding:10px 10px 10px 6px;
-    background:linear-gradient(90deg, rgba(178,143,239,.38), rgba(67,62,123,.30) 60%, rgba(5,9,17,.2));
+    background:linear-gradient(90deg, rgba(178,143,239,.26), rgba(67,62,123,.16) 60%, transparent);
     border:1px solid rgba(178,143,239,.75);
     box-shadow:0 0 18px rgba(178,143,239,.35), inset 0 0 18px rgba(178,143,239,.15);
   }
