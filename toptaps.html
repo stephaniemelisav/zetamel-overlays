@@ -27,8 +27,8 @@
     --cyan:#65c6e4;
     --indigo:#433e7b;
     --silver:#e0dfe3;
-    --panel:rgba(5,9,17,.40);
-    --row:rgba(67,62,123,.14);
+    --panel:rgba(5,9,17,.18);
+    --row:rgba(67,62,123,.08);
     --w:300px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -38,7 +38,7 @@
     color:var(--bone);
     padding:14px;
     -webkit-font-smoothing:antialiased;
-    text-shadow:0 1px 3px rgba(5,9,17,.85);
+    text-shadow:0 1px 2px rgba(5,9,17,.95),0 0 6px rgba(5,9,17,.7);
   }
 
   /* ---------- panel ---------- */
@@ -47,15 +47,15 @@
     width:var(--w);
     padding:12px 12px 12px;
     background:
-      radial-gradient(120% 70% at 0% 0%, rgba(178,143,239,.12), transparent 60%),
-      linear-gradient(180deg, rgba(67,62,123,.18), transparent 40%),
+      radial-gradient(120% 70% at 0% 0%, rgba(178,143,239,.07), transparent 60%),
+      linear-gradient(180deg, rgba(67,62,123,.10), transparent 40%),
       var(--panel);
     border:1px solid rgba(178,143,239,.35);
     border-radius:14px;
     box-shadow:
       0 0 0 1px rgba(5,9,17,.9) inset,
-      0 0 22px rgba(178,143,239,.16),
-      0 12px 28px rgba(0,0,0,.30);
+      0 0 18px rgba(178,143,239,.12),
+      0 10px 22px rgba(0,0,0,.18);
     overflow:hidden;
     isolation:isolate;
   }
@@ -154,7 +154,7 @@
   /* #1 — lavanda domina */
   .row.r1{
     padding:10px 10px 10px 6px;
-    background:linear-gradient(90deg, rgba(178,143,239,.26), rgba(67,62,123,.16) 60%, transparent);
+    background:linear-gradient(90deg, rgba(178,143,239,.18), rgba(67,62,123,.08) 60%, transparent);
     border:1px solid rgba(178,143,239,.75);
     box-shadow:0 0 18px rgba(178,143,239,.35), inset 0 0 18px rgba(178,143,239,.15);
   }
